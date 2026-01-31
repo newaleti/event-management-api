@@ -3,10 +3,22 @@ import cors from "cors";
 import "dotenv/config";
 import connectDB from "./config/db.js";
 
+import eventRoutes from "./routes/eventRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+// Log request middleware(receptionist)
+app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} request for ${req.url}`);
+    next();
+});
+
+app.use("/api/events", eventRoutes);
+app.use("/api/auth", authRoutes);
 
 app.get("/health", (req, res) => {
   res.send("Server is up and running!");
