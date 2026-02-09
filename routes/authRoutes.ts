@@ -46,12 +46,18 @@ router.post("/register", async (req, res) => {
       userId: newUser._id,
     });
   } catch (error) {
-    // Handle duplicate key errors from MongoDB
-    if (error.code === 11000) {
-      return res.status(400).json({ message: "User already exists" });
+    if (error && typeof error === "object" && "code" in error) {
+      const err = error as { code?: number };
+      if (err.code === 11000) {
+        return res.status(400).json({ message: "User already exists" });
+      }
     }
 
-    console.error(error);
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error("Unknown error", error);
+    }
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -77,9 +83,15 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
     // 3. Success! Send back a token or success message
+    const secret = process.env.JWT_SECRET;
+
+    if (!secret) {
+      return res.status(500).json({ message: "JWT secret is not configured" });
+    }
+
     const token = jwt.sign(
-      { id: user._id, role: user.role }, // Payload: data we want to store
-      process.env.JWT_SECRET, // Secret key to sign the token
+      { id: user._id, role: user.role, assignedMosque: user.assignedMosque }, // Payload: data we want to store
+      secret, // Secret key to sign the token
       { expiresIn: "1h" }, // Token life span
     );
     res.status(200).json({
@@ -89,9 +101,15 @@ router.post("/login", async (req, res) => {
         id: user._id,
         username: user.username,
         role: user.role,
+        assignedMosque: user.assignedMosque,
       },
     });
   } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error("Unknown error", error);
+    }
     res.status(500).json({ message: "Server error" });
   }
 });

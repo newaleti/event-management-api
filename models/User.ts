@@ -28,9 +28,10 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["user", "admin"],
+      enum: ["user", "mosque_admin", "super_admin"],
       default: "user",
     },
+    assignedMosque: { type: mongoose.Schema.Types.ObjectId, ref: "Mosque" }, // Helpful for Mosque Admins
   },
   { timestamps: true },
 ); // This automatically adds 'createdAt' and 'updatedAt' fields!
