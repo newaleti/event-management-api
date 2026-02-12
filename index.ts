@@ -11,7 +11,7 @@ import bookingRoutes from "./routes/bookingRoutes.js";
 
 const app = express();
 
-app.use(cors());
+app.use(cors({ origin: "*" })); // Allow all origins for development; adjust in production
 app.use(express.json());
 
 // Log request middleware(receptionist)
